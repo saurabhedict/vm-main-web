@@ -359,7 +359,6 @@ def api_tts_script():
             temperature=0.2,
             max_tokens=2000,
         )
-
         import json
         result = json.loads(response.choices[0].message.content)
         return jsonify(result)
@@ -406,7 +405,6 @@ def api_tts():
         'है', 'नहीं', 'और', 'था', 'हैं', 'यह', 'हो', 'उन्होंने',
         'कहा', 'इससे', 'इसलिए', 'बताया', 'राज्य', 'सरकार'
     ]
-
     marathi_hits = sum(1 for w in MARATHI_WORDS if w in text)
     hindi_hits = sum(1 for w in HINDI_WORDS if w in text)
 

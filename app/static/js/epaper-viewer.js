@@ -27,17 +27,46 @@ const EP = {
     this.cacheDOM();
     this.bindEvents();
     this.setDate(new Date());
+<<<<<<< HEAD
     this.loadEditions();
   },
 
   // Optimize Cloudinary image URLs: auto format, auto quality, resize width
   optimizeCloudinaryUrl(url, width = 600) {
+=======
+    // Load editions list in background (for calendar) - don't await
+    this.loadEditions();
+  },
+
+  // API response cache (5-minute TTL)
+  _apiCache: {},
+  _cacheTTL: 5 * 60 * 1000,
+  async _cachedFetch(url) {
+    const now = Date.now();
+    const cached = this._apiCache[url];
+    if (cached && (now - cached.ts) < this._cacheTTL) {
+      return cached.data;
+    }
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    this._apiCache[url] = { data, ts: now };
+    return data;
+  },
+
+  // Optimize Cloudinary image URLs: auto format, auto quality, resize width
+  optimizeCloudinaryUrl(url, width = 400) {
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     if (!url || typeof url !== 'string') return url;
     // Only transform Cloudinary URLs (res.cloudinary.com)
     if (!url.includes('res.cloudinary.com')) return url;
     // Avoid double-transforming (if /upload/f_auto already present)
     if (url.includes('/f_auto')) return url;
+<<<<<<< HEAD
     // Insert transforms after /upload/
+=======
+    // Insert transforms after /upload/ — f_auto picks WebP/AVIF, q_auto adjusts quality
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_limit/`);
   },
 
@@ -88,6 +117,12 @@ const EP = {
       voiceCloseBtn: document.getElementById('epVoiceCloseBtn'),
       voiceBack: document.getElementById('epVoiceBack'),
       voiceForward: document.getElementById('epVoiceForward'),
+<<<<<<< HEAD
+=======
+      voiceDuration: document.getElementById('epVoiceDuration'),
+      voiceVolBtn: document.getElementById('epVoiceVolBtn'),
+      artBackFromPlayer: document.getElementById('epArtBackFromPlayer'),
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
       voiceSelect: document.getElementById('epVoiceSelect'),
       ttsStartBtn: document.getElementById('epTtsStartBtn'),
       ttsEstimate: document.getElementById('epTtsEstimate'),
@@ -98,6 +133,21 @@ const EP = {
       translateOutput: document.getElementById('epTranslateOutput'),
       summaryOutput: document.getElementById('epSummaryOutput'),
       toast: document.getElementById('epToast'),
+<<<<<<< HEAD
+=======
+      // Thumbnail strip
+      thumbStrip: document.getElementById('epThumbStrip'),
+      thumbScroll: document.getElementById('epThumbScroll'),
+      thumbToggle: document.getElementById('epThumbToggle'),
+      thumbLeft: document.getElementById('epThumbLeft'),
+      thumbRight: document.getElementById('epThumbRight'),
+      // Edge arrows
+      edgePrev: document.getElementById('epEdgePrev'),
+      edgeNext: document.getElementById('epEdgeNext'),
+      // Scroll buttons
+      scrollUp: document.getElementById('epScrollUp'),
+      scrollDown: document.getElementById('epScrollDown'),
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     };
   },
 
@@ -115,12 +165,20 @@ const EP = {
     this.el.prevPage?.addEventListener('click', () => this.changePage(-1));
     this.el.nextPage?.addEventListener('click', () => this.changePage(1));
 
+<<<<<<< HEAD
+=======
+    // Edge page arrows
+    this.el.edgePrev?.addEventListener('click', () => this.changePage(-1));
+    this.el.edgeNext?.addEventListener('click', () => this.changePage(1));
+
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     // Zoom
     this.el.zoomIn?.addEventListener('click', () => this.setZoom(this.zoom + 0.25));
     this.el.zoomOut?.addEventListener('click', () => this.setZoom(this.zoom - 0.25));
     this.el.fitPage?.addEventListener('click', () => this.setZoom(1));
     this.el.fullscreen?.addEventListener('click', () => this.toggleFullscreen());
 
+<<<<<<< HEAD
     // Viewer pan/drag
     const v = this.el.viewer;
     if (v) {
@@ -132,6 +190,43 @@ const EP = {
       v.addEventListener('touchstart', (e) => this.startDrag(e.touches[0]), { passive: true });
       v.addEventListener('touchmove', (e) => { e.preventDefault(); this.onDrag(e.touches[0]); }, { passive: false });
       v.addEventListener('touchend', () => this.endDrag());
+=======
+    // Scroll buttons
+    this.el.scrollUp?.addEventListener('click', () => {
+      const viewer = this.el.viewer;
+      if (viewer) viewer.scrollBy({ top: -300, behavior: 'smooth' });
+    });
+    this.el.scrollDown?.addEventListener('click', () => {
+      const viewer = this.el.viewer;
+      if (viewer) viewer.scrollBy({ top: 300, behavior: 'smooth' });
+    });
+
+    // Thumbnail strip
+    this.el.thumbToggle?.addEventListener('click', () => this.toggleThumbStrip());
+    this.el.thumbLeft?.addEventListener('click', () => {
+      this.el.thumbScroll?.scrollBy({ left: -200, behavior: 'smooth' });
+    });
+    this.el.thumbRight?.addEventListener('click', () => {
+      this.el.thumbScroll?.scrollBy({ left: 200, behavior: 'smooth' });
+    });
+
+    // Fullscreen change listener
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        document.body.classList.remove('ep-fullscreen');
+      }
+    });
+
+    // Viewer wheel zoom
+    const v = this.el.viewer;
+    if (v) {
+      v.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          this.setZoom(this.zoom + (e.deltaY < 0 ? 0.15 : -0.15));
+        }
+      }, { passive: false });
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     }
 
     // Article panel back
@@ -142,8 +237,15 @@ const EP = {
       tab.addEventListener('click', () => this.switchAiTab(tab.dataset.tab));
     });
 
+<<<<<<< HEAD
     // TTS / Voice Player
     this.el.ttsStartBtn?.addEventListener('click', () => this.voicePlay());
+=======
+ // TTS / Voice Player
+    this.el.ttsStartBtn?.addEventListener('click', () => this.voicePlay());
+    this.el.voiceVolBtn?.addEventListener('click', () => this.voiceToggleMute());
+    this.el.artBackFromPlayer?.addEventListener('click', () => this.closeArticle());
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     this.el.voicePlayBtn?.addEventListener('click', () => this.voiceToggle());
     this.el.voiceSpeedBtn?.addEventListener('click', () => this.voiceCycleSpeed());
     this.el.voiceCloseBtn?.addEventListener('click', () => this.voiceStop());
@@ -160,7 +262,11 @@ const EP = {
       this._voiceUpdateUI();
     });
 
+<<<<<<< HEAD
     // Voice selector — update selected voice
+=======
+    // Voice selector
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     this.el.voiceSelect?.addEventListener('change', () => {
       this._voice.selectedVoice = this.el.voiceSelect.value;
     });
@@ -209,6 +315,13 @@ const EP = {
       this.el.dateBtnText.textContent = d.toLocaleDateString('hi-IN', opts);
     }
     this.currentPage = 1;
+<<<<<<< HEAD
+=======
+    // Clear API cache when switching dates so fresh data loads
+    const iso = this.formatDateISO(d);
+    delete this._apiCache[`/api/epaper/edition/${iso}`];
+    delete this._apiCache['/api/epaper/editions'];
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     this.loadEditionForDate(d);
   },
 
@@ -310,16 +423,22 @@ const EP = {
   // ── Data Loading ──
   async loadEditions() {
     try {
+<<<<<<< HEAD
       const res = await fetch('/api/epaper/editions');
       if (res.ok) {
         const data = await res.json();
         this.editions = Array.isArray(data) ? data : (data.editions || data.results || []);
       }
+=======
+      const data = await this._cachedFetch('/api/epaper/editions');
+      this.editions = Array.isArray(data) ? data : (data.editions || data.results || []);
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     } catch (e) { console.warn('Could not load editions:', e); }
   },
 
   async loadEditionForDate(d) {
     const iso = this.formatDateISO(d);
+<<<<<<< HEAD
     try {
       const res = await fetch(`/api/epaper/edition/${iso}`);
       if (!res.ok) {
@@ -327,12 +446,24 @@ const EP = {
         return;
       }
       const data = await res.json();
+=======
+
+    // Show loading skeleton immediately
+    this.showLoadingSkeleton();
+
+    try {
+      const data = await this._cachedFetch(`/api/epaper/edition/${iso}`);
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
       this.currentEdition = data;
       this.pages = data.pages || [];
       this.totalPages = this.pages.length || 1;
       this.updateEditionBrand(data);
       document.getElementById('epEmptyState')?.style.setProperty('display', 'none');
       this.renderCategories(this.pages);
+<<<<<<< HEAD
+=======
+      this.renderThumbnails();
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
       this.showPage(1);
     } catch (e) {
       console.warn('Edition load error:', e);
@@ -340,6 +471,36 @@ const EP = {
     }
   },
 
+<<<<<<< HEAD
+=======
+  showLoadingSkeleton() {
+    const viewer = this.el.viewer || document.getElementById('epViewer');
+    if (!viewer) return;
+
+    // Remove existing block grid to show skeleton
+    let grid = document.getElementById('epBlockGrid');
+    if (!grid) {
+      grid = document.createElement('div');
+      grid.id = 'epBlockGrid';
+      grid.className = 'ep-block-grid';
+      viewer.appendChild(grid);
+    }
+    grid.style.display = 'block';
+    if (this.el.pageContainer) this.el.pageContainer.style.display = 'none';
+
+    grid.innerHTML = `
+      <div class="ep-canvas-viewer" style="position:relative;width:100%;padding-bottom:141.25%;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+          <div style="text-align:center;">
+            <div style="width:48px;height:48px;border:3px solid #e0e0e0;border-top:3px solid #e41e26;border-radius:50%;animation:epSpin .8s linear infinite;margin:0 auto 16px;"></div>
+            <p style="color:#6b7280;font-size:14px;font-weight:500;">Loading edition...</p>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
   showDemoPage() {
     // Show a placeholder when no real data
     this.currentEdition = null;
@@ -390,7 +551,11 @@ const EP = {
     this.applyTransform();
     this.updatePager();
 
+<<<<<<< HEAD
     const page = this.pages[this.currentPage - 1];
+=======
+     const page = this.pages[this.currentPage - 1];
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     if (!page) return;
 
     const viewer = this.el.viewer || document.getElementById('epViewer');
@@ -413,6 +578,15 @@ const EP = {
       const grid = document.getElementById('epBlockGrid');
       if (grid) grid.style.display = 'none';
     }
+<<<<<<< HEAD
+=======
+
+    // Scroll viewer to top when switching pages
+    if (this.el.viewer) this.el.viewer.scrollTop = 0;
+
+    // Update thumbnail active state
+    this.updateThumbActive();
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
   },
 
   changePage(dir) {
@@ -423,6 +597,12 @@ const EP = {
     if (this.el.pageInfo) this.el.pageInfo.textContent = `${this.currentPage} / ${this.totalPages}`;
     if (this.el.prevPage) this.el.prevPage.disabled = this.currentPage <= 1;
     if (this.el.nextPage) this.el.nextPage.disabled = this.currentPage >= this.totalPages;
+<<<<<<< HEAD
+=======
+    // Update edge arrows
+    if (this.el.edgePrev) this.el.edgePrev.disabled = this.currentPage <= 1;
+    if (this.el.edgeNext) this.el.edgeNext.disabled = this.currentPage >= this.totalPages;
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
   },
 
   getBlockType(block) {
@@ -460,14 +640,22 @@ const EP = {
 
     this.articles = [];
 
+<<<<<<< HEAD
     // Canvas is 800x1000 in admin — use percentage-based positioning
+=======
+    // Canvas is 800×1130 in admin — use percentage-based positioning
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     const CANVAS_W = 800;
     let maxY = 400;
     blocks.forEach((block) => {
       const bottom = (block.y || 0) + (block.h || 150);
       if (bottom > maxY) maxY = bottom;
     });
+<<<<<<< HEAD
     const canvasH = Math.max(maxY + 20, 500);
+=======
+    const canvasH = Math.max(maxY + 20, 1130);
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     const aspectRatio = (canvasH / CANVAS_W * 100).toFixed(2);
 
     grid.innerHTML = `
@@ -505,8 +693,13 @@ const EP = {
             gallery: block.gallery || [],
           }) - 1;
 
+<<<<<<< HEAD
           // Optimize Cloudinary images: add auto format/quality and width transform
           const imgSrc = hasImg ? this.optimizeCloudinaryUrl(block.image_url, 600) : '';
+=======
+          // Optimize Cloudinary images: smaller width for card thumbnails
+          const imgSrc = hasImg ? this.optimizeCloudinaryUrl(block.image_url, 400) : '';
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
 
           return `
             <div class="ep-block-card" onclick="EP.openArticle(${articleIndex})" title="${block.headline || ''}" style="${baseStyle}cursor:pointer;">
@@ -546,13 +739,18 @@ const EP = {
     });
   },
 
+<<<<<<< HEAD
   // ── Zoom / Pan ──
+=======
+  // ── Zoom ──
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
   setZoom(level) {
     this.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, level));
     this.applyTransform();
   },
 
   applyTransform() {
+<<<<<<< HEAD
     if (!this.el.pageContainer) return;
     this.el.pageContainer.style.transform = `translate(${this.panOffset.x}px, ${this.panOffset.y}px) scale(${this.zoom})`;
   },
@@ -576,10 +774,85 @@ const EP = {
     if (!document.fullscreenElement) {
       (this.el.viewer || document.body).requestFullscreen?.();
     } else {
+=======
+    // Apply zoom to the block grid or page container
+    const grid = document.getElementById('epBlockGrid');
+    if (grid) {
+      grid.style.transform = `scale(${this.zoom})`;
+      grid.style.transformOrigin = 'top center';
+    }
+    if (this.el.pageContainer) {
+      this.el.pageContainer.style.transform = `scale(${this.zoom})`;
+    }
+  },
+
+  toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.body.classList.add('ep-fullscreen');
+      (this.el.viewer || document.body).requestFullscreen?.();
+    } else {
+      document.body.classList.remove('ep-fullscreen');
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
       document.exitFullscreen?.();
     }
   },
 
+<<<<<<< HEAD
+=======
+  // ── Thumbnail Strip ──
+  toggleThumbStrip() {
+    const strip = this.el.thumbStrip;
+    const toggle = this.el.thumbToggle;
+    if (!strip) return;
+    strip.classList.toggle('collapsed');
+    if (toggle) {
+      toggle.innerHTML = strip.classList.contains('collapsed')
+        ? '<i class="fa fa-chevron-down"></i>'
+        : '<i class="fa fa-chevron-up"></i>';
+    }
+  },
+
+  renderThumbnails() {
+    const container = this.el.thumbScroll;
+    if (!container || !this.pages.length) {
+      if (container) container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = this.pages.map((page, i) => {
+      const cat = page.category || `Page ${i + 1}`;
+      const blocks = page.blocks || [];
+      // Find the first block with an image for the thumbnail
+      const firstImg = blocks.find(b => b.image_url && b.image_url.length > 10);
+      const thumbUrl = firstImg ? this.optimizeCloudinaryUrl(firstImg.image_url, 120) : '';
+      const isActive = (i + 1) === this.currentPage;
+
+      return `
+        <div class="ep-thumb-card ${isActive ? 'active' : ''}" onclick="EP.showPage(${i + 1})">
+          <div class="ep-thumb-label">${cat}</div>
+          ${thumbUrl
+            ? `<img class="ep-thumb-img" src="${thumbUrl}" alt="${cat}" loading="lazy">`
+            : `<div class="ep-thumb-placeholder"><i class="fa fa-newspaper"></i></div>`
+          }
+        </div>
+      `;
+    }).join('');
+  },
+
+  updateThumbActive() {
+    const container = this.el.thumbScroll;
+    if (!container) return;
+    container.querySelectorAll('.ep-thumb-card').forEach((card, i) => {
+      card.classList.toggle('active', (i + 1) === this.currentPage);
+    });
+    // Scroll active thumbnail into view
+    const activeCard = container.querySelector('.ep-thumb-card.active');
+    if (activeCard) {
+      activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  },
+
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
   // ── Article Panel ──
   currentArticle: null,
 
@@ -591,6 +864,7 @@ const EP = {
     if (this.el.articleCategory) this.el.articleCategory.textContent = art.category_label || 'News';
     if (this.el.articleTitle) this.el.articleTitle.textContent = art.headline || '';
     if (this.el.articleDate) this.el.articleDate.textContent = art.created_at || this.formatDateISO(this.currentDate);
+<<<<<<< HEAD
     if (this.el.articleImg) {
       if (art.article_image_url || art.image_url) {
         const imgUrl = art.article_image_url || art.image_url;
@@ -611,10 +885,18 @@ const EP = {
         this.el.articleImg.style.display = 'none';
         this.el.articleImg.onclick = null;
       }
+=======
+    // Always hide cover image — gallery images are used instead
+    if (this.el.articleImg) {
+      this.el.articleImg.style.display = 'none';
+      this.el.articleImg.classList.remove('wide');
+      this.el.articleImg.onclick = null;
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     }
 
     // Rich HTML content or plain text
     if (this.el.articleText) {
+<<<<<<< HEAD
       if (art.body_html && art.body_html.length > 10) {
         this.el.articleText.innerHTML = art.body_html;
       } else {
@@ -631,6 +913,23 @@ const EP = {
         });
         galHTML += '</div>';
         this.el.articleText.innerHTML += galHTML;
+=======
+      // Show gallery images at original size BEFORE the article text
+      const gallery = art.gallery || [];
+      let galHTML = '';
+      if (gallery.length > 0) {
+        galHTML = '<div class="ep-article-gallery-full">';
+        gallery.forEach((img, i) => {
+          galHTML += `<img src="${img}" alt="Image ${i+1}" class="ep-gallery-full-img" loading="lazy" onload="this.classList.add('loaded')" onclick="EP.openGalleryViewer(${index}, ${i})">`;
+        });
+        galHTML += '</div>';
+      }
+
+      if (art.body_html && art.body_html.length > 10) {
+        this.el.articleText.innerHTML = galHTML + art.body_html;
+      } else {
+        this.el.articleText.innerHTML = galHTML + (art.body_text || '').split('\n').map(p => `<p>${p}</p>`).join('');
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
       }
     }
 
@@ -789,6 +1088,55 @@ const EP = {
     }
   },
 
+<<<<<<< HEAD
+=======
+  // Fast inline text preprocessing for TTS (no LLM needed)
+  _preprocessTTSText(text) {
+    if (!text) return text;
+    let t = text;
+
+    // Expand common Hindi abbreviations
+    const hindiAbbr = {
+      'JEE': 'जे ई ई', 'NEET': 'नीट', 'IIT': 'आई आई टी',
+      'IIM': 'आई आई एम', 'NIT': 'एन आई टी',
+      'UP': 'उत्तर प्रदेश', 'MP': 'मध्य प्रदेश', 'MH': 'महाराष्ट्र',
+      'CM': 'मुख्यमंत्री', 'PM': 'प्रधानमंत्री',
+      'BJP': 'बी जे पी', 'RSS': 'आर एस एस', 'AAP': 'आम आदमी पार्टी',
+      'CBSE': 'सी बी एस ई', 'ICSE': 'आई सी एस ई',
+      'SSC': 'एस एस सी', 'HSC': 'एच एस सी',
+      'CET': 'सी ई टी', 'MHT-CET': 'एम एच टी सी ई टी',
+      'DTE': 'डी टी ई', 'NGO': 'एन जी ओ',
+    };
+
+    // Only replace standalone abbreviations (word boundaries)
+    for (const [abbr, expansion] of Object.entries(hindiAbbr)) {
+      const regex = new RegExp(`\\b${abbr}\\b`, 'g');
+      t = t.replace(regex, expansion);
+    }
+
+    // Convert ₹ amounts to Hindi words
+    t = t.replace(/₹\s?(\d[\d,]*)/g, (_, num) => {
+      const n = parseInt(num.replace(/,/g, ''));
+      if (n >= 10000000) return `${(n/10000000).toFixed(1)} करोड़ रुपये`;
+      if (n >= 100000) return `${(n/100000).toFixed(1)} लाख रुपये`;
+      if (n >= 1000) return `${(n/1000).toFixed(0)} हज़ार रुपये`;
+      return `${n} रुपये`;
+    });
+
+    // Convert percentage symbols
+    t = t.replace(/(\d+)%/g, '$1 प्रतिशत');
+
+    // Add natural pauses after sentences
+    t = t.replace(/।\s*/g, '। ... ');
+    t = t.replace(/\.\s+/g, '. ... ');
+
+    // Clean up excessive whitespace
+    t = t.replace(/\s{3,}/g, '  ');
+
+    return t.trim();
+  },
+
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
   // ── Start playing (fetch audio from Edge TTS API) ──
   async voicePlay() {
     if (!this.currentArticle) return;
@@ -800,6 +1148,7 @@ const EP = {
     this.voiceStop();
     this._voice.loading = true;
 
+<<<<<<< HEAD
     // Read voice selection from selector if not already set
     if (this.el.voiceSelect && !this._voice.selectedVoice) {
       this._voice.selectedVoice = this.el.voiceSelect.value || '';
@@ -810,6 +1159,11 @@ const EP = {
     if (this.el.voiceBar) {
       this.el.voiceBar.classList.add('active', 'loading');
     }
+=======
+    // Show inline player, hide prompt
+    if (this.el.ttsPrompt) this.el.ttsPrompt.style.display = 'none';
+    if (this.el.voiceBar) this.el.voiceBar.classList.add('active', 'loading');
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     if (this.el.voiceTitle) this.el.voiceTitle.textContent = this.currentArticle.headline || 'Article';
     this._voiceUpdatePlayIcon();
     
@@ -817,6 +1171,7 @@ const EP = {
     let rateStr = '+0%';
     let pitchStr = '+0Hz';
 
+<<<<<<< HEAD
     try {
       // Step 1: LLM Script Optimization
       this.showToast('📝 Optimizing news script...');
@@ -854,6 +1209,13 @@ const EP = {
 
     // Step 2: Generate TTS Audio
     this.showToast('🎙️ Generating natural voice...');
+=======
+    // Inline text preprocessing (fast, no LLM needed)
+    textToRead = this._preprocessTTSText(textToRead);
+
+    // Step: Generate TTS Audio directly (skip LLM for speed)
+    this.showToast('🎙️ Generating voice...');
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     
     // If rate wasn't set by LLM, set it by user default
     if (rateStr === '+0%' && this._voice.rate !== 1) {
@@ -891,6 +1253,10 @@ const EP = {
       // Wire up audio events
       audio.addEventListener('loadedmetadata', () => {
         this._voice.loading = false;
+<<<<<<< HEAD
+=======
+        if (this.el.voiceDuration) this.el.voiceDuration.textContent = this._formatTime(audio.duration || 0);
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
         this._voiceUpdatePlayIcon();
       });
 
@@ -925,7 +1291,10 @@ const EP = {
       console.error('TTS Error:', err);
       this._voice.loading = false;
       this.showToast('Voice generation failed. Try again.');
+<<<<<<< HEAD
       // Hide player, restore prompt
+=======
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
       if (this.el.voiceBar) this.el.voiceBar.classList.remove('active', 'loading');
       if (this.el.ttsPrompt) this.el.ttsPrompt.style.display = '';
       this._voiceUpdatePlayIcon();
@@ -943,8 +1312,12 @@ const EP = {
     }
     if (this.el.voiceRemaining) this.el.voiceRemaining.textContent = '0:00';
     this._voiceUpdatePlayIcon();
+<<<<<<< HEAD
     if (this.el.voiceBar) this.el.voiceBar.classList.remove('playing', 'loading');
     // After a short pause show the prompt again
+=======
+   if (this.el.voiceBar) this.el.voiceBar.classList.remove('playing', 'loading');
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     setTimeout(() => {
       if (this.el.voiceBar) this.el.voiceBar.classList.remove('active');
       if (this.el.ttsPrompt) this.el.ttsPrompt.style.display = '';
@@ -978,13 +1351,24 @@ const EP = {
     this._voiceUpdatePlayIcon();
   },
 
+<<<<<<< HEAD
   // Stop and hide inline player — restore the prompt
+=======
+  // Stop and hide voice bar
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
   voiceStop() {
     const audio = this._voice.audio;
     if (audio) {
       audio.pause();
       audio.currentTime = 0;
+<<<<<<< HEAD
       if (audio.src && audio.src.startsWith('blob:')) URL.revokeObjectURL(audio.src);
+=======
+      // Revoke blob URL to free memory
+      if (audio.src && audio.src.startsWith('blob:')) {
+        URL.revokeObjectURL(audio.src);
+      }
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
       this._voice.audio = null;
     }
     this._voice.playing = false;
@@ -993,7 +1377,10 @@ const EP = {
     if (this.el.voiceBar) {
       this.el.voiceBar.classList.remove('active', 'playing', 'loading');
     }
+<<<<<<< HEAD
     // Restore the play prompt
+=======
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
     if (this.el.ttsPrompt) this.el.ttsPrompt.style.display = '';
     if (this.el.voiceProgressFill) this.el.voiceProgressFill.style.width = '0%';
     this._voiceUpdatePlayIcon();
@@ -1025,6 +1412,21 @@ const EP = {
     this.showToast(`Speed: ${this._voice.rate}x`);
   },
 
+<<<<<<< HEAD
+=======
+  // Mute / unmute
+  voiceToggleMute() {
+    const audio = this._voice.audio;
+    if (!audio) return;
+    audio.muted = !audio.muted;
+    if (this.el.voiceVolBtn) {
+      this.el.voiceVolBtn.innerHTML = audio.muted
+        ? '<i class="fa fa-volume-xmark"></i>'
+        : '<i class="fa fa-volume-high"></i>';
+    }
+  },
+
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
   // Update play/pause icon + waveform state
   _voiceUpdatePlayIcon() {
     if (this.el.voicePlayIcon) {
@@ -1053,6 +1455,10 @@ const EP = {
     if (this.el.voiceProgressFill) this.el.voiceProgressFill.style.width = pct + '%';
     if (this.el.voiceElapsed) this.el.voiceElapsed.textContent = this._formatTime(current);
     if (this.el.voiceRemaining) this.el.voiceRemaining.textContent = '-' + this._formatTime(remaining);
+<<<<<<< HEAD
+=======
+    if (this.el.voiceDuration) this.el.voiceDuration.textContent = this._formatTime(duration);
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
   },
 
   // Legacy compat — called by closeArticle
@@ -1173,4 +1579,8 @@ const EP = {
 };
 
 // Initialize on DOM ready
+<<<<<<< HEAD
 document.addEventListener('DOMContentLoaded', () => EP.init());
+=======
+document.addEventListener('DOMContentLoaded', () => EP.init());
+>>>>>>> 5c6d32cc9d6a384996ee6732afc75a888006c84a
